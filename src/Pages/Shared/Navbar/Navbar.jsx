@@ -8,22 +8,10 @@ const Navbar = () => {
            <li>
             <Link to='/menu'>Menu</Link>
           </li>
-          <li tabIndex={0}>
-            <details>
-              <summary>Parent</summary>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
-            </details>
+           <li>
+            <Link to='/order/salad'>Order</Link>
           </li>
-          <li>
-            <a>Item 3</a>
-          </li>
+          
     </>
   return (
     <div className="navbar fixed  z-10 bg-black max-w-screen-xl bg-opacity-40 text-white">
