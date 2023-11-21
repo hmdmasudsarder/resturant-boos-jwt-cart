@@ -1,11 +1,15 @@
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Provider/AuthProvider";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
+import Swal from "sweetalert2";
+import SocialLogin from "../../Components/SocialLogin/SocialLogin";
 
 const SignUp = () => {
-    const {createUser, updateUserProfile} =  useContext(AuthContext)
-    const navigate = useNavigate();
+  const { createUser, updateUserProfile } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const axiosPublic = useAxiosPublic();
   const {
     register,
     handleSubmit,
@@ -13,20 +17,35 @@ const SignUp = () => {
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => {
-    createUser(data.email, data.password)
-    .then(result => {
-        const loggedUser = result.user;
-        updateUserProfile(data.name, data.PhotoURL)
+    createUser(data.email, data.password).then(() => {
+      // const loggedUser = result.user;
+      updateUserProfile(data.name, data.PhotoURL)
         .then(() => {
-            console.log('User Profile Update')
-            reset()
-            navigate('/')
+          const userInfo = {
+            name: data.name,
+            email: data.email,
+          };
+          console.log("User Profile Update");
+          axiosPublic.post("/users", userInfo).then((res) => {
+            console.log(res.data)
+            if(res.data.insertedId) {
+              reset();
+              Swal.fire({
+                position: "top-center",
+                icon: "success",
+                title: "Your Sign Up successFully",
+                showConfirmButton: false,
+                timer: 1500
+              });
+              navigate("/");
+            }
+          });
         })
-        .catch(error => console.log(error))
-        console.log(loggedUser)
-    })
-    console.log(data)
-};
+        .catch((error) => console.log(error));
+      // console.log(loggedUser);
+    });
+    console.log(data);
+  };
   return (
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col lg:flex-row-reverse">
@@ -51,7 +70,9 @@ const SignUp = () => {
                 placeholder="First Name"
                 className="input input-bordered"
               />
-              {errors.name && <span className="text-red-600">Name is required</span>}
+              {errors.name && (
+                <span className="text-red-600">Name is required</span>
+              )}
             </div>
             <div className="form-control">
               <label className="label">
@@ -60,11 +81,12 @@ const SignUp = () => {
               <input
                 type="text"
                 {...register("PhotoURL", { required: true })}
-            
                 placeholder="Photo URL"
                 className="input input-bordered"
               />
-              {errors.PhotoURL && <span className="text-red-600">Name is required</span>}
+              {errors.PhotoURL && (
+                <span className="text-red-600">Name is required</span>
+              )}
             </div>
             <div className="form-control">
               <label className="label">
@@ -76,9 +98,10 @@ const SignUp = () => {
                 name="email"
                 placeholder="email"
                 className="input input-bordered"
-        
               />
-              {errors.email && <span className="text-red-400">Email is required</span>}
+              {errors.email && (
+                <span className="text-red-400">Email is required</span>
+              )}
             </div>
             <div className="form-control">
               <label className="label">
@@ -86,13 +109,21 @@ const SignUp = () => {
               </label>
               <input
                 type="password"
-                {...register("password", {required: true, minLength: 5, maxLength: 8})}
+                {...register("password", {
+                  required: true,
+                  minLength: 5,
+                  maxLength: 8,
+                })}
                 name="password"
                 placeholder="password"
                 className="input input-bordered"
               />
-              {errors.password?.type === 'required' && <span className="text-red-400">Password is required</span>}
-              {errors.password?.type === 'minLength' && <span className="text-red-400">5 required</span>}
+              {errors.password?.type === "required" && (
+                <span className="text-red-400">Password is required</span>
+              )}
+              {errors.password?.type === "minLength" && (
+                <span className="text-red-400">5 required</span>
+              )}
               <label className="label">
                 <a href="#" className="label-text-alt link link-hover">
                   Forgot password?
@@ -100,9 +131,16 @@ const SignUp = () => {
               </label>
             </div>
             <div className="form-control mt-6">
-              <input type="submit" value="Sign Up" className="btn btn-primary"/>
+              <input
+                type="submit"
+                value="Sign Up"
+                className="btn btn-primary"
+              />
             </div>
           </form>
+          <p className="text-green-300 p-1 text-center">Already have a Account Please ? <Link className="text-red-400" to="/login">Login</Link> </p>
+          <SocialLogin className="p-10">
+          </SocialLogin>
         </div>
       </div>
     </div>
